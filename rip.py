@@ -32,6 +32,7 @@ def main():
     dirs_to_loop = [directory for directory in dirs_in_root if directory not in completed_dirs]
     print(dirs_to_loop)
     # TODO: Loop through each subdir in the root folder, find WAVs, create video for each and spit out to the output directory that is dated
+    # TODO: Enum all in directory and show progress
     for directory in dirs_to_loop:
         full_dir_path = f"{args.root_dir}/{directory}"
         # os.chdir(full_dir_path)
@@ -39,9 +40,9 @@ def main():
         for song in music_files:
             # TODO: Use output_dir
             pass
-            # generate_video(f"{args.root_dir}{directory}/{song}", full_dir_path, f"./{song}.mp4")
-        generate_video(f"{args.root_dir}/{directory}/{music_files[2]}", full_dir_path, f"./{music_files[2]}.mp4")
-        print(music_files[2])
+            generate_video(f"{args.root_dir}/{directory}/{song}", full_dir_path, f"./output/{song}.mp4")
+        # generate_video(f"{args.root_dir}/{directory}/{music_files[2]}", full_dir_path, f"./{music_files[2]}.mp4")
+        # print(music_files[2])
         # TODO: If all WAVs are successful, add it to the completed text
         # with open("completed.txt", "a") as f:
         #     print("help")
