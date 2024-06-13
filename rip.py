@@ -17,6 +17,7 @@ class ValidatePath(argparse.Action):
 
 
 def main():
+    # CLI arguments
     parser = argparse.ArgumentParser(description="Generate videos from folders")
     parser.add_argument("root_dir", help="Root directory", action=ValidatePath)
     parser.add_argument("output_dir", help="Directory for outputs", nargs="?", default="./output", action=ValidatePath)
@@ -37,8 +38,11 @@ def main():
         # TODO: Flac/mp3 support and stuff
         for song in Path(directory).glob("*.wav"):
             all_songs.append(song)
+        for song in Path(directory).glob("*.flac"):
+            all_songs.append(song)
     songs_to_generate = [song for song in all_songs if str(song) not in completed_songs]
     
+    # Grab number of songs being generated for future use
     num_songs = len(songs_to_generate)
     if num_songs <= 0:
         print("No songs in folder needing to be generated, quitting")
@@ -46,23 +50,26 @@ def main():
     num_successful = num_songs
     failed_songs = []
 
-    # TODO: Enum all in directory and show progress
+    # Create the output directory
     directory_output_dir = output_dir / Path(get_current_date_and_time())
     os.mkdir(directory_output_dir)
 
+    # Generate all videos
     with open("completed.txt", "a") as f:
         for song in songs_to_generate:
             path = str(song)
             if "/" in path:
                 path = path[:path.rfind("/")]
             try:
+                print(f"-> Creating video for '{str(song)}'")
                 generate_video(song, path, directory_output_dir / Path(str(song).strip(".wav") + ".mp4").name)  # lol
                 f.write(str(song)+"\n")
             except Exception as e:
                 num_successful -= 1
-                print(str(e))
+                print("-!! ERROR: "+str(e))
     
-    print("-----RESULTS-----")
+    # Print results
+    print("\n-----RESULTS-----")
     print(f"-> Number of files processed: {num_songs}")
     print(f"-> Success rate: {num_successful} / {num_songs}")
     if num_successful > 0:
@@ -87,7 +94,6 @@ def gen_cmd(song_path, files_path, out_path):
     if num_images == 0:
         raise Exception(f"No png images found in dir '{files_path}', skipping.")
     seconds_per_image = math.ceil(song_length / num_images)
-    # Quotes being eaten for some reason
     cmd = f'ffmpeg -y -framerate 1/{seconds_per_image} -pattern_type glob -i \"{images_glob}\" -i \"{song_path}\" ' \
           f'-c:v libx264 -r 15 -tune stillimage -preset ultrafast -pix_fmt yuv420p -shortest \"{out_path}\"'
     print(cmd)
@@ -96,7 +102,6 @@ def gen_cmd(song_path, files_path, out_path):
 def get_length_of_audio_in_seconds(song_path):
     if not os.path.exists:
         raise Exception(f"File at path: '{song_path}' not found")
-    # This fails, change dir
     f = soundfile.SoundFile(song_path)
     seconds = f.frames / f.samplerate
     return seconds
