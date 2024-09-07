@@ -95,7 +95,8 @@ def gen_cmd(song_path, files_path, out_path):
         raise Exception(f"No png images found in dir '{files_path}', skipping.")
     seconds_per_image = math.ceil(song_length / num_images)
     cmd = f'ffmpeg -y -framerate 1/{seconds_per_image} -pattern_type glob -i \"{images_glob}\" -i \"{song_path}\" ' \
-          f'-c:v libx264 -r 15 -tune stillimage -preset ultrafast -pix_fmt yuv420p -shortest \"{out_path}\"'
+          f'-c:v libx264 -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" -r 15 -tune stillimage -preset ultrafast -pix_fmt yuv420p ' \
+          f'-shortest \"{out_path}\"'
     print(cmd)
     return cmd
 
